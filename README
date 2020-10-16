@@ -1,6 +1,10 @@
 whois.sh accepts a single-column list of public IP addresses in a file and determines the owner (Organization) for those IP addresses by performing a WHOIS search using ip-api.com.
-So, you may use it to perform a bulk whois lookup for many public IP addresses.
+So, you may use it to perform a bulk whois lookup for many public IP addresses. Note that you may not get results for all lookups.
 The WHOIS lookup service at ip-api.com is rate limited to lookups in batches of 100 IP addresses with upto 15 batches a minute. You may populate the input file with as many public IPs as required and the whois.sh script will take care of not falling foul of the throughput requirements.
+
+NOTE:
+-----
+The whois utility on Linux may also be used and can be easily installed (yum/dnf/apt install). However, using this utility requires outbound connectivity to tcp/43 on a WHOIS server (e.g. whois.ripe.net) and tests performed on a batch of around 425 public IP addresses revealed that the whois utility returned 25% fewer results than cybergavin/whois (which uses API calls to ip-api.com).
 
 -- Cybergavin
 

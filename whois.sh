@@ -25,12 +25,11 @@ mapfile=ip-whois; cat /dev/null > $mapfile
 # ip-api accepts batches of 100 IPs at a time for whois lookups
 #
 num_ips=`wc -l $ipfile | cut -d' ' -f1`
-#last_batch=$(( num_ips % 100 ))
-last_batch=$(( num_ips % 2 )) # Temp test
+last_batch=$(( num_ips % 100 ))
 if [ $last_batch -eq 0 ]; then
-        num_batches=$(( num_ips / 2 )) # Temp test
+        num_batches=$(( num_ips / 100 ))
 else
-        num_batches=$(( (num_ips / 2) + 1 )) # Temp test
+        num_batches=$(( (num_ips / 100) + 1 ))
 fi
 #
 # For each batch, generate the require JSON data, make the API call and process the response
@@ -39,7 +38,7 @@ bn=1
 while [ $bn -le $num_batches ]
         do
                 if [ $bn -lt $num_batches ]; then
-                        head -$(( bn * 2 )) $ipfile | tail -2 | sed 's/^/"/g;s/$/",/g;$s/,/\n]/;1 s/"/[\n"/' > ipbatch${bn}.json # Temp test
+                        head -$(( bn * 100 )) $ipfile | tail -100 | sed 's/^/"/g;s/$/",/g;$s/,/\n]/;1 s/"/[\n"/' > ipbatch${bn}.json
                         curl -X POST http://ip-api.com/batch?fields=org -d @ipbatch${bn}.json 2>/dev/null | jq '.[] |.org' > ipbatch${bn}.whois
                         cat ipbatch${bn}.json | jq '.[]' > ipbatch${bn}.ip
                         if [ `wc -l ipbatch${bn}.ip | cut -d' ' -f1` -eq `wc -l ipbatch${bn}.whois | cut -d' ' -f1` ]; then
@@ -47,9 +46,9 @@ while [ $bn -le $num_batches ]
                         else
                                 echo "ERROR : Unmatched #lines in ipbatch${bn}.whois and ipbatch${bn}.ip"
                         fi
-                        if [ $(( bn % 3 )) -eq 0 ]; then # Temp test
-				echo "Sleeping for 5 seconds due to rate limiting requirements..."
-                                sleep 5
+                        if [ $(( bn % 15 )) -eq 0 ]; then
+				echo "Processed 1500 records...Sleeping for 65 seconds due to rate limiting requirements..."
+                                sleep 65
                         fi
                         bn=$(( bn + 1 ))
                 else
